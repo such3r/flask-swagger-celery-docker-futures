@@ -10,20 +10,24 @@ from marshmallow import Schema, fields
 spec = APISpec(
     title="My App",
     version="1.0.0",
-    openapi_version="3.0.2",
+    openapi_version="3.0.3",
     plugins=[FlaskPlugin(), MarshmallowPlugin()],
 )
 
 # Define schemas
-class InputSchema(Schema):
-    number = fields.Int(description="An integer.", required=True)
+class FileIDSchema(Schema):
+    id = fields.Str(description="A file ID.", required=True)
 
-class OutputSchema(Schema):
+class FileInputSchema(Schema):
+    file = fields.Raw(description="A file.", metadata={"type": "string", "format": "binary"}, required=True)
+
+class MessageSchema(Schema):
     msg = fields.String(description="A message.", required=True)
 
 # register schemas with spec
-spec.components.schema("Input", schema=InputSchema)
-spec.components.schema("Output", schema=OutputSchema)
+spec.components.schema("FileID", schema=FileIDSchema)
+spec.components.schema("FileInput", schema=FileInputSchema)
+spec.components.schema("Message", schema=MessageSchema)
 
 # add swagger tags that are used for endpoint annotation
 tags = [
