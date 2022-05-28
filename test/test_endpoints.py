@@ -10,6 +10,14 @@ def test_history(api_v1_host):
     assert 'msg' in json
     assert json['msg'] == "I'm the test endpoint from history."
 
+def test_graph(api_v1_host):
+    endpoint = os.path.join(api_v1_host, 'graph', 'test')
+    response = requests.get(endpoint)
+    assert response.status_code == 200
+    json = response.json()
+    assert 'msg' in json
+    assert json['msg'] == "I'm the test endpoint from graph."
+
 def test_history_get(api_v1_host):
     endpoint = os.path.join(api_v1_host, 'history', 'get')
     payload = {'number': 5}

@@ -31,13 +31,16 @@ spec.components.schema("Message", schema=MessageSchema)
 
 # add swagger tags that are used for endpoint annotation
 tags = [
-            {'name': 'testing',
+            {'name': 'Testing',
              'description': 'For testing the API.'
             },
-            {'name': 'calculation',
-             'description': 'Functions for calculating.'
+            {'name': 'History',
+             'description': 'History file manipulationa.'
             },
-       ]
+            {'name': 'Visualization',
+             'description': 'Graph depiction.'
+            },
+]
 
 for tag in tags:
     print(f"Adding tag: {tag['name']}")
