@@ -35,7 +35,7 @@ tags = [
              'description': 'For testing the API.'
             },
             {'name': 'History',
-             'description': 'History file manipulationa.'
+             'description': 'History file manipulation.'
             },
             {'name': 'Visualization',
              'description': 'Graph depiction.'

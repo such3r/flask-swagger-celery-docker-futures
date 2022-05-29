@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload a history file</title>
+  {{ dropzone.load_css() }}
+  {{ dropzone.style('border: 2px dashed #0087F7;') }}
+</head>
+<body>
+  {{ dropzone.create(action='history.add_history') }}
+  {{ dropzone.load_js() }}
+  {{ dropzone.config() }}
+  <div id="chart" class="chart"></div>
+</body>
+</html>

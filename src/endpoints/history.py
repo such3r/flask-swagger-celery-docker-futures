@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, render_template, make_response, request
 
 blueprint_name: str = "history"
 bp = Blueprint(name=blueprint_name, import_name=__name__)
@@ -22,7 +22,7 @@ def test():
     return jsonify(output)
 
 
-@bp.route('/<id>', methods=["GET"])
+@bp.route('/<id>', methods=["GET", "DELETE"])
 def get_history(id: str):
     """
     ---
@@ -61,7 +61,7 @@ def get_history(id: str):
         return jsonify(output)
 
 
-@bp.route('/add', methods=["POST"])
+@bp.route('/', methods=["GET", "POST"])
 def add_history():
     """
     ---
@@ -76,12 +76,14 @@ def add_history():
         '200':
           description: call successful
           content:
-            application/json:
+            text/html:
               schema: MessageSchema
       tags:
           - History
     """
-    # retrieve body data from input JSON
-    raw = request.get_json()
-    output = {"msg": f"Your data has length: '{len(raw)}'"}
-    return jsonify(output)
+    if request.method == 'POST':
+        f = request.files.get('file')
+        print(f.filename)
+        # f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
+
+    return make_response(render_template('upload.html'))
