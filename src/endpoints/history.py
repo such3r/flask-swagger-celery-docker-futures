@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, render_template, make_response, request
+from celery.result import AsyncResult
+from ..utils import read_file_with_hash, add_file_to_database, read_history_by_id, remove_history_by_id
 
 blueprint_name: str = "history"
 bp = Blueprint(name=blueprint_name, import_name=__name__)
@@ -54,10 +56,17 @@ def get_history(id: str):
           - History
     """
     if request.method == "GET":
-        output = {"msg": f"Getting {id}."}
+        history = read_history_by_id(id)
+
+        if history is None:
+            output = {"history": None}
+        else:
+            output = {"history": history.to_json()}
+
         return jsonify(output)
     elif request.method == "DELETE":
-        output = {"msg": f"Deleting {id}."}
+        remove_history_by_id.apply_async(args=[id])
+        output = {"msg": f"Deleted {id}."}
         return jsonify(output)
 
 
@@ -83,7 +92,10 @@ def add_history():
     """
     if request.method == 'POST':
         f = request.files.get('file')
-        print(f.filename)
+        file_hash, contents = read_file_with_hash(f)
+        add_file_to_database(file_hash, contents)#.apply_async(args=[file_hash, contents])
+
+        # mongodb_client.save_file(f.filename, f)
         # f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
 
     return make_response(render_template('upload.html'))

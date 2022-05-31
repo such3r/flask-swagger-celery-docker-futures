@@ -11,10 +11,20 @@
   {{ dropzone.load_js() }}
   {{ dropzone.config() }}
   <div id="chart" class="chart"></div>
+  {% if historyGraphJSON %}
+  <div id="history" class="chart"></div>
+  {% endif %}
+  {% if seasonalityGraphJSON %}
+  <div id="seasonality" class="chart"></div>
+  {% endif %}
 </body>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
-  var graphs = {{graphJSON | safe}};
-  Plotly.plot('chart',graphs,{});
+  var history = {{historyGraphJSON | safe}};
+  Plotly.newPlot('history',history,{});
+</script>
+<script type="text/javascript">
+  var seasonality = {{seasonalityGraphJSON | safe}};
+  Plotly.newPlot('seasonality',seasonality,{});
 </script>
 </html>
