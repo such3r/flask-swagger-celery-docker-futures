@@ -15,26 +15,47 @@ from src.subsystems.database import mongodb_client
 
 
 def make_seasonality(data: pd.DataFrame) -> pd.DataFrame:
+
+    def get_year_relative_mean(frame: pd.DataFrame) -> pd.DataFrame:
+        years = pd.unique(frame.index.year)
+        parts = []
+        actual_years = []
+
+        for y in years:
+            year_part = frame.loc[frame.index.year == y]
+
+            if year_part.index[0].month > 1:
+                continue
+
+            first_day_price = year_part.iloc[0]
+            relative_part = (year_part - first_day_price) / first_day_price
+            relative_part.index = relative_part.index.strftime("%j")
+
+            parts.append(relative_part)
+            actual_years.append(y)
+
+        by_year = pd.concat(parts, axis=1, keys=actual_years).sort_index()
+        by_year_average = by_year.mean(axis=1)
+        by_year_average = by_year_average.loc[by_year_average.index < "366"]
+        by_year_average.index = pd.to_datetime(str(actual_years[-1]) + by_year_average.index, format='%Y%j')
+        return by_year_average
+
     closes = data[["close"]].copy()
 
-    deltas = [0, 1, 5, 10, 15]
-    delta_names = ["All time", "Year to date", "Five years", "Ten years", "Fifteen years"]
+    deltas = [1, 5, 10, 15]
+    delta_names = ["Year to date", "Five years", "Ten years", "Fifteen years"]
     components = []
 
     for d in deltas:
-        if d > 0:
-            cutoff = closes.index[-1] - relativedelta(years=d)
-            shrunk = closes.loc[closes.index > cutoff]
-        else:
-            shrunk = closes
-
-        agg = shrunk.groupby([shrunk.index.month, shrunk.index.day]).mean()
-        components.append(agg)
+        cutoff = closes.index[-1] - relativedelta(years=d)
+        shrunk = get_year_relative_mean(closes.loc[closes.index > cutoff])
+        components.append(shrunk)
 
     seasonality = pd.concat(components, axis=1)
+    # print(seasonality)
     seasonality.columns = delta_names
-    seasonality.index = seasonality.index.map(lambda x: "2000/" + "/".join(["%.2d" % v for v in x]))
-    seasonality.index = pd.to_datetime(seasonality.index)
+    # seasonality.index = seasonality.index.map(lambda x: "2000/" + "/".join(["%.2d" % v for v in x]))
+    # seasonality.index = pd.to_datetime(seasonality.index.values)
     seasonality.index = seasonality.index.strftime("%b %d")
     return seasonality
 
@@ -45,7 +66,7 @@ def read_history_from_file(file) -> pd.DataFrame:
                                      index_col=1,
                                      ).drop(columns=['NA'])
 
-    data.index = pd.to_datetime(data.index)
+    data.index = pd.to_datetime(data.index.values)
     return data
 
 
@@ -129,7 +150,10 @@ def plot_graph(data: pd.DataFrame) -> (go.Figure, go.Figure):
                                                  high=data["high"],
                                                  low=data["low"],
                                                  close=data["close"],)])
-    candlestick.update_layout(title="Price history")
+    candlestick.update_layout(title="Price history",
+                              yaxis=dict(fixedrange=False),)
+                              # xaxis = dict(type="category",
+                              #              categoryorder="category ascending",))
     lines = px.line(seasonality, x=seasonality.index, y=seasonality.columns)
     lines.update_layout(title="Seasonality")
     return (candlestick, lines)
