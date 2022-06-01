@@ -10,7 +10,6 @@
   {{ dropzone.create(action='history.add_history') }}
   {{ dropzone.load_js() }}
   {{ dropzone.config() }}
-  <div id="chart" class="chart"></div>
   {% if historyGraphJSON %}
   <div id="history" class="chart"></div>
   {% endif %}
@@ -20,8 +19,8 @@
 </body>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
-  var history = {{historyGraphJSON | safe}};
-  Plotly.newPlot('history',history,{});
+  var historyGraph = {{historyGraphJSON | safe}};
+  Plotly.newPlot('history',historyGraph,{});
 </script>
 <script type="text/javascript">
   var seasonality = {{seasonalityGraphJSON | safe}};

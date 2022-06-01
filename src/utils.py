@@ -124,17 +124,14 @@ def remove_history_by_id(id: str):
 
 def plot_graph(data: pd.DataFrame) -> (go.Figure, go.Figure):
     seasonality = make_seasonality(data)
-    # fig = make_subplots(rows=2, cols=1, subplot_titles=("History", "Seasonality"))
     candlestick = go.Figure(data=[go.Candlestick(x=data.index,
                                                  open=data["open"],
                                                  high=data["high"],
                                                  low=data["low"],
-                                                 close=data["close"])])
+                                                 close=data["close"],)])
+    candlestick.update_layout(title="Price history")
     lines = px.line(seasonality, x=seasonality.index, y=seasonality.columns)
-    # fig.add_trace(candlestick, row=1, col=1)
-    # fig.add_trace(lines, row=2, col=1)
-
-    # mix = go.Figure(data=candlestick.data + lines.data)
+    lines.update_layout(title="Seasonality")
     return (candlestick, lines)
 
 

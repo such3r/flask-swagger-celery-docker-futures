@@ -52,7 +52,7 @@ def main_view():
     # return make_response(render_template('graph.html', graphJSON=history_graph_json))
     return make_response(render_template('main.html',
                                          historyGraphJSON=history_graph_json,
-                                         seasonalityGraphJSON=history_graph_json))
+                                         seasonalityGraphJSON=seasonality_graph_json))
 
 @bp.route('/<id>', methods=['GET'])
 def get_graph(id: str):
