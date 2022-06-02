@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  web:
+    container_name: application
+#    image: starterapp
+    build: .
+    ports:
+      - 5001:5000
+    links:
+      - redis
+      - mongodb
+    depends_on:
+      - mongodb
+      - celery_worker
+#    volumes:
+#      - .:/app
+  mongodb:
+    image: mongo
+    container_name: database
+    hostname: mongodb
+    ports:
+      - 27018:27017
+#    volumes:
+#      - db-data:/data/db
+  redis:
+    image: "redis:alpine"
+    container_name: broker
+    hostname: redis
+  celery_worker:
+    container_name: worker
+    build:
+      context: .
+#    volumes:
+#      - .:/app
+    hostname: worker
+    entrypoint: celery
+    command: -A src.subsystems.tasks.celery -b redis://redis:6379 worker
+    links:
+      - redis
+    depends_on:
+      - redis
+
+#volumes:
+#  db-data:

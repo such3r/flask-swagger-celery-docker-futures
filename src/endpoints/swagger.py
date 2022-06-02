@@ -10,6 +10,6 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "My App"
+        'app_name': "Flask+Swagger+MongoDB+Celery+Plotly"
     }
 )

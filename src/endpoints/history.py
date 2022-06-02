@@ -93,9 +93,6 @@ def add_history():
     if request.method == 'POST':
         f = request.files.get('file')
         file_hash, contents = read_file_with_hash(f)
-        add_file_to_database(file_hash, contents)#.apply_async(args=[file_hash, contents])
-
-        # mongodb_client.save_file(f.filename, f)
-        # f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
+        add_file_to_database.apply_async(args=[file_hash, contents])
 
     return make_response(render_template('upload.html'))

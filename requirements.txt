@@ -1,16 +1,12 @@
-flask
-
-# testing
-pytest
-requests
-
-# production
-uwsgi
-
-# swagger api docs
-apispec
-apispec_webframeworks
-marshmallow
-flask_swagger_ui
-openapi_spec_validator
-
+apispec==5.2.2
+apispec-webframeworks==0.5.2
+celery==5.2.6
+Flask==2.1.2
+flask-apispec==0.11.1
+Flask-Dropzone==1.6.0
+Flask-PyMongo==2.3.0
+flask-swagger-ui==4.11.1
+marshmallow==3.15.0
+pandas==1.4.2
+plotly==5.8.0
+pytest==7.1.2

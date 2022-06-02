@@ -4,6 +4,8 @@
 from flask import Flask, jsonify
 from flask_dropzone import Dropzone
 
+from src.api_spec import spec
+
 # init Flask app
 app = Flask(__name__)
 
@@ -17,16 +19,25 @@ app.config.update(
     # MondoDB:
     MONGO_URI="mongodb://localhost:27017/historydb",
     # Celery:
-    CELERY_BROKER_URL="redis://localhost:6379/0",
-    result_backend="redis://localhost:6379/0",
+    CELERY_BROKER_URL="redis://localhost:6379",
+    result_backend="redis://localhost:6379",
 )
 
+
+@app.route("/api/swagger.json")
+def create_swagger_spec():
+    """
+    Swagger API definition.
+    """
+    return jsonify(spec.to_dict())
+
+
 if __name__ == "__main__":
-    from subsystems.tasks import celery, ready_tasks_monitor
+    from subsystems.tasks import celery#, ready_tasks_monitor
 
     celery.conf.update(app.config)
     celery.conf.main = app.name
-    celery.conf.broker_url = app.config['CELERY_BROKER_URL']
+    # celery.conf.broker_url = app.config['CELERY_BROKER_URL']
     # ready_tasks_monitor(celery)
 
     dropzone = Dropzone(app)
@@ -40,9 +51,6 @@ if __name__ == "__main__":
     app.register_blueprint(history, url_prefix="/api/v1/history")
     app.register_blueprint(graph, url_prefix="/api/v1/graph")
 
-    from src.api_spec import spec
-    # register all swagger documented functions here
-
     with app.test_request_context():
         for fn_name in app.view_functions:
             if fn_name == 'static':
@@ -51,13 +59,7 @@ if __name__ == "__main__":
             view_fn = app.view_functions[fn_name]
             spec.path(view=view_fn)
 
-    @app.route("/api/swagger.json")
-    def create_swagger_spec():
-        """
-        Swagger API definition.
-        """
-        return jsonify(spec.to_dict())
-
+    # register all swagger documented functions here
     app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
     app.run(host='0.0.0.0', debug=True)

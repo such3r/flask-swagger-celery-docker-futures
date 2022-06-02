@@ -1,4 +1,5 @@
-# Minimal Flask Application for RESTful APIs
+# Flask Application for RESTful APIs with additional services
+![Web application](webapp.png)
 ![Swagger UI API documentation](swagger_ui.png)
 This repository offers a minimal Flask application for RESTful APIs and can help you to quickly set up a REST API.
 

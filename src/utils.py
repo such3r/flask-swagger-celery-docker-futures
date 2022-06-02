@@ -5,7 +5,6 @@ import hashlib
 import plotly
 import plotly.graph_objects as go
 import plotly.express as px
-# from plotly.subplots import make_subplots
 
 from dateutil.relativedelta import relativedelta
 from typing import Union, Tuple
@@ -16,7 +15,7 @@ from src.subsystems.database import mongodb_client
 
 def make_seasonality(data: pd.DataFrame) -> pd.DataFrame:
 
-    def get_year_relative_mean(frame: pd.DataFrame) -> pd.DataFrame:
+    def get_year_relative_mean(frame: pd.DataFrame) -> pd.Series:
         years = pd.unique(frame.index.year)
         parts = []
         actual_years = []
@@ -29,15 +28,13 @@ def make_seasonality(data: pd.DataFrame) -> pd.DataFrame:
 
             first_day_price = year_part.iloc[0]
             relative_part = (year_part - first_day_price) / first_day_price
-            relative_part.index = relative_part.index.strftime("%j")
+            relative_part.index = relative_part.index.strftime("2000-%m-%d")
 
             parts.append(relative_part)
             actual_years.append(y)
 
         by_year = pd.concat(parts, axis=1, keys=actual_years).sort_index()
         by_year_average = by_year.mean(axis=1)
-        by_year_average = by_year_average.loc[by_year_average.index < "366"]
-        by_year_average.index = pd.to_datetime(str(actual_years[-1]) + by_year_average.index, format='%Y%j')
         return by_year_average
 
     closes = data[["close"]].copy()
@@ -52,10 +49,8 @@ def make_seasonality(data: pd.DataFrame) -> pd.DataFrame:
         components.append(shrunk)
 
     seasonality = pd.concat(components, axis=1)
-    # print(seasonality)
     seasonality.columns = delta_names
-    # seasonality.index = seasonality.index.map(lambda x: "2000/" + "/".join(["%.2d" % v for v in x]))
-    # seasonality.index = pd.to_datetime(seasonality.index.values)
+    seasonality.index = pd.to_datetime(seasonality.index.values, format="%Y-%m-%d")
     seasonality.index = seasonality.index.strftime("%b %d")
     return seasonality
 
@@ -94,11 +89,8 @@ def add_file_to_database(file_hash: str, contents: str):
     data_contents = data_title
     data_contents.update({"contents": contents})
 
-    # print(data.find_one(data_title))
-
     if data.find_one(data_title):
         pass
-        # data.update_one(data_title, data_contents)
     else:
         data.insert_one(data_contents)
 
@@ -110,7 +102,6 @@ def add_file_to_database(file_hash: str, contents: str):
 
     if log.find_one(log_title):
         pass
-        # log.update_one(log_title, log_data)
     else:
         log.insert_one(log_data)
 
@@ -152,8 +143,6 @@ def plot_graph(data: pd.DataFrame) -> (go.Figure, go.Figure):
                                                  close=data["close"],)])
     candlestick.update_layout(title="Price history",
                               yaxis=dict(fixedrange=False),)
-                              # xaxis = dict(type="category",
-                              #              categoryorder="category ascending",))
     lines = px.line(seasonality, x=seasonality.index, y=seasonality.columns)
     lines.update_layout(title="Seasonality")
     return (candlestick, lines)
